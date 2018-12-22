@@ -127,6 +127,7 @@
 
 #define DEBUG_SEGV_HANDLER 0
 
+#include <suws_debug.h>
 #include "libbb.h"
 #include "common_bufsiz.h"
 #include <syslog.h>
@@ -144,6 +145,7 @@
 # include <execinfo.h>
 # include <sys/ucontext.h>
 #endif
+
 
 /* Used only for sanitizing purposes in set_sane_term() below. On systems where
  * the baud rate is stored in a separate field, we can safely disable them. */
@@ -475,6 +477,7 @@ static void init_exec(const char *command)
 		ioctl(STDIN_FILENO, TIOCSCTTY, 0 /*only try, don't steal*/);
 	}
 	/* Here command never contains the dash, cmd[0] might */
+	SUWS_PRINT("suws_busybox flow init_exec:%s ,%s,%s,%d\n",command,__FILE__,__func__,__LINE__);
 	BB_EXECVP(command, cmd);
 	message(L_LOG | L_CONSOLE, "can't run '%s': "STRERROR_FMT, command STRERROR_ERRNO);
 	/* returns if execvp fails */
@@ -556,6 +559,7 @@ static pid_t run(const struct init_action *a)
 
 	/* Now run it.  The new program will take over this PID,
 	 * so nothing further in init.c should be run. */
+	SUWS_PRINT("suws_busybox flow run a->command:%s ,%s,%s,%d\n",a->command,__FILE__,__func__,__LINE__);
 	init_exec(a->command);
 	/* We're still here?  Some error happened. */
 	_exit(-1);
@@ -599,18 +603,23 @@ static void waitfor(pid_t pid)
 /* Run all commands of a particular type */
 static void run_actions(int action_type)
 {
+	SUWS_PRINT("suws_busybox flow run_actions +++ ,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	struct init_action *a;
 
 	for (a = G.init_action_list; a; a = a->next) {
+		SUWS_PRINT("suws_busybox flow run_actions ,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		if (!(a->action_type & action_type))
 			continue;
 
+		SUWS_PRINT("suws_busybox flow run_actions ,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		if (a->action_type & (SYSINIT | WAIT | ONCE | CTRLALTDEL | SHUTDOWN)) {
+			SUWS_PRINT("suws_busybox flow run_actions ,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 			pid_t pid = run(a);
 			if (a->action_type & (SYSINIT | WAIT | CTRLALTDEL | SHUTDOWN))
 				waitfor(pid);
 		}
 		if (a->action_type & (RESPAWN | ASKFIRST)) {
+			SUWS_PRINT("suws_busybox flow run_actions ,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 			/* Only run stuff with pid == 0. If pid != 0,
 			 * it is already running
 			 */
@@ -618,6 +627,7 @@ static void run_actions(int action_type)
 				a->pid = run(a);
 		}
 	}
+	SUWS_PRINT("suws_busybox flow run_actions --- ,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 }
 
 static void new_init_action(uint8_t action_type, const char *command, const char *cons)
@@ -1056,14 +1066,17 @@ static void sleep_much(void)
 int init_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 int init_main(int argc UNUSED_PARAM, char **argv)
 {
+	SUWS_PRINT("suws_busybox flow init_main +++ ,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	INIT_G();
 
 	if (argv[1] && strcmp(argv[1], "-q") == 0) {
 		return kill(1, SIGHUP);
 	}
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 
 #if DEBUG_SEGV_HANDLER
 	{
+		SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		struct sigaction sa;
 		memset(&sa, 0, sizeof(sa));
 		sa.sa_sigaction = handle_sigsegv;
@@ -1075,7 +1088,9 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 	}
 #endif
 
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	if (!DEBUG_INIT) {
+		SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		/* Some users send poweroff signals to init VERY early.
 		 * To handle this, mask signals early,
 		 * and unmask them only after signal handlers are installed.
@@ -1116,6 +1131,7 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 	putenv((char *) "SHELL=/bin/sh");
 	putenv((char *) "USER=root"); /* needed? why? */
 
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	if (argv[1])
 		xsetenv("RUNLEVEL", argv[1]);
 
@@ -1124,14 +1140,17 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 	message(L_CONSOLE | L_LOG, "init started: %s", bb_banner);
 #endif
 
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	/* Check if we are supposed to be in single user mode */
 	if (argv[1]
 	 && (strcmp(argv[1], "single") == 0 || strcmp(argv[1], "-s") == 0 || LONE_CHAR(argv[1], '1'))
 	) {
+		SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		/* ??? shouldn't we set RUNLEVEL="b" here? */
 		/* Start a shell on console */
 		new_init_action(RESPAWN, bb_default_login_shell, "");
 	} else {
+		SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		/* Not in single user mode - see what inittab says */
 
 		/* NOTE that if CONFIG_FEATURE_USE_INITTAB is NOT defined,
@@ -1142,7 +1161,9 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 	}
 
 #if ENABLE_SELINUX
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	if (getenv("SELINUX_INIT") == NULL) {
+		SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		int enforce = 0;
 
 		putenv((char*)"SELINUX_INIT=YES");
@@ -1157,7 +1178,9 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 	}
 #endif
 
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	if (ENABLE_FEATURE_INIT_MODIFY_CMDLINE) {
+		SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		/* Make the command line just say "init"  - that's all, nothing else */
 		strncpy(argv[0], "init", strlen(argv[0]));
 		/* Wipe argv[1]-argv[N] so they don't clutter the ps listing */
@@ -1167,6 +1190,7 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 
 	/* Set up signal handlers */
 	if (!DEBUG_INIT) {
+		SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 		struct sigaction sa;
 
 		/* Stop handler must allow only SIGCONT inside itself */
@@ -1205,7 +1229,9 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 
 	/* Now run everything that needs to be run */
 	/* First run the sysinit command */
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	run_actions(SYSINIT);
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	check_delayed_sigs();
 	/* Next run anything that wants to block */
 	run_actions(WAIT);
@@ -1215,6 +1241,7 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 
 	/* Now run the looping stuff for the rest of forever.
 	 */
+	SUWS_PRINT("suws_busybox flow init_main,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 	while (1) {
 		int maybe_WNOHANG;
 
@@ -1258,6 +1285,7 @@ int init_main(int argc UNUSED_PARAM, char **argv)
 			maybe_WNOHANG = WNOHANG;
 		}
 	} /* while (1) */
+	SUWS_PRINT("suws_busybox flow init_main --- ,%s,%s,%d\n",__FILE__,__func__,__LINE__);
 }
 
 //usage:#define linuxrc_trivial_usage NOUSAGE_STR

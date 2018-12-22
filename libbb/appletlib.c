@@ -25,6 +25,7 @@
  *
  * FEATURE_INSTALLER or FEATURE_SUID will still link printf routines in. :(
  */
+#include <suws_debug.h>
 #include "busybox.h"
 
 #if !(defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
@@ -819,6 +820,7 @@ static
 #  endif
 int busybox_main(int argc UNUSED_PARAM, char **argv)
 {
+	SUWS_PRINT("suws_busybox flow busybox_main +++ %s,%s,%d\n",__FILE__,__func__,__LINE__);
 	if (!argv[1]) {
 		/* Called without arguments */
 		const char *a;
@@ -955,12 +957,14 @@ int busybox_main(int argc UNUSED_PARAM, char **argv)
 	 * "#!/bin/busybox"-style wrappers */
 	applet_name = bb_get_last_path_component_nostrip(argv[0]);
 	run_applet_and_exit(applet_name, argv);
+	SUWS_PRINT("suws_busybox flow busybox_main --- %s,%s,%d\n",__FILE__,__func__,__LINE__);
 }
 # endif
 
 # if NUM_APPLETS > 0
 void FAST_FUNC run_applet_no_and_exit(int applet_no, const char *name, char **argv)
 {
+	SUWS_PRINT("suws_busybox flow run_applet_no_and_exit +++ %s,%s,%d\n",__FILE__,__func__,__LINE__);
 	int argc = string_array_len(argv);
 
 	/*
@@ -993,15 +997,27 @@ void FAST_FUNC run_applet_no_and_exit(int applet_no, const char *name, char **ar
 	}
 	if (ENABLE_FEATURE_SUID)
 		check_suid(applet_no);
+
+	SUWS_PRINT("suws_busybox flow applet_main[%d] ,%d,%s,%s,%d\n",applet_no,argc,__FILE__,__func__,__LINE__);
+
+	{
+		int i;
+		for(i = 0; i < argc ; i++){
+			SUWS_PRINT("suws_busybox flow applet_main[%d] %s %s,%s,%d\n",applet_no,argv[i],__FILE__,__func__,__LINE__);
+		}
+	}
+
 	xfunc_error_retval = applet_main[applet_no](argc, argv);
 	/* Note: applet_main() may also not return (die on a xfunc or such) */
 	xfunc_die();
+	SUWS_PRINT("suws_busybox flow run_applet_no_and_exit --- %s,%s,%d\n",__FILE__,__func__,__LINE__);
 }
 # endif /* NUM_APPLETS > 0 */
 
 # if ENABLE_BUSYBOX || NUM_APPLETS > 0
 static NORETURN void run_applet_and_exit(const char *name, char **argv)
 {
+	SUWS_PRINT("suws_busybox flow run_applet_and_exit +++ %s,%s,%d\n",__FILE__,__func__,__LINE__);
 #  if ENABLE_BUSYBOX
 	if (is_prefixed_with(name, "busybox"))
 		exit(busybox_main(/*unused:*/ 0, argv));
@@ -1019,6 +1035,7 @@ static NORETURN void run_applet_and_exit(const char *name, char **argv)
 	full_write2_str(applet_name);
 	full_write2_str(": applet not found\n");
 	/* POSIX: "If a command is not found, the exit status shall be 127" */
+	SUWS_PRINT("suws_busybox flow run_applet_and_exit --- %s,%s,%d\n",__FILE__,__func__,__LINE__);
 	exit(127);
 }
 # endif
@@ -1032,6 +1049,7 @@ int lbb_main(char **argv)
 int main(int argc UNUSED_PARAM, char **argv)
 #endif
 {
+	SUWS_PRINT("suws_busybox flow main +++ %s,%s,%d\n",__FILE__,__func__,__LINE__);
 #if 0
 	/* TODO: find a use for a block of memory between end of .bss
 	 * and end of page. For example, I'm getting "_end:0x812e698 2408 bytes"
@@ -1120,6 +1138,7 @@ int main(int argc UNUSED_PARAM, char **argv)
 
 	parse_config_file(); /* ...maybe, if FEATURE_SUID_CONFIG */
 	run_applet_and_exit(applet_name, argv);
+	SUWS_PRINT("suws_busybox flow main --- %s,%s,%d\n",__FILE__,__func__,__LINE__);
 
 #endif
 }
