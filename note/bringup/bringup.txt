@@ -1,0 +1,36 @@
+用户进程 pid 1
+/linuxrc // 命令
+	init_main // 命令相关的主要函数
+
+/bin/sh /etc/init.d/rcS  // 命令
+	ash_main 
+
+下面都是 etc/init.d/rcS 中的进程
+
+mount -a
+	mount_main
+mkdir -p /dev/pts
+	mkdir_main
+mount -t devpts devpts /dev/pts
+	mount_main
+mdev -s
+	mdev_main
+mkdir -p /var/lock
+	mkdir_main
+
+Please press Enter to activate this console.
+# 按下按键之后,激活下面的进程
+-/bin/sh
+	ash_main
+
+也就是说从 init 进程(/linuxrc) 开始, 分别 有
+
+1. linuxrc
+2. sh /etc/init.d/rcS
+3. mount -a
+4. mkdir -p /dev/pts
+5. mount -t devpts devpts /dev/pts
+6. mdev -s
+7. mkdir -p /var/lock
+ // 上面的进程不需要用户交互即可建立,下面的进程需要按下按键才会建立
+8. -/bin/sh 
