@@ -6,8 +6,10 @@
 # Version : 1.0
 #########################################################################
 #!/bin/bash
-make -j8
-make install
+if [ "$1" == "all"  ];then
+	make -j8
+	make install
+fi
 rm rootfs -rf
 mkdir rootfs
 mkdir rootfs/lib
@@ -22,7 +24,7 @@ sudo mknod -m 666 tty4 c 4 4
 sudo mknod -m 666 console c 5 1
 sudo mknod -m 666 null c 1 3
 cd ../../
-tar xvf etc.tar.gz -C rootfs
+cp etc rootfs -r
 cd rootfs
 mkdir proc sys tmp var
 cd ..
