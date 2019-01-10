@@ -25,6 +25,7 @@ sudo mknod -m 666 console c 5 1
 sudo mknod -m 666 null c 1 3
 cd ../../
 cp etc rootfs -r
+cp work rootfs -r
 cd rootfs
 mkdir proc sys tmp var
 cd ..
