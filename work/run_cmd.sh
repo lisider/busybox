@@ -8,16 +8,15 @@
 #!/bin/sh
 
 if [ $# -eq 0  ];then
-	echo usage: ./run.sh fuction_name_to_trace  test
+	echo usage: ./run_cmd.sh fuction_name_to_trace  cmd
 	echo fuction_name_to_trace is the fuction_name to trace
-	echo test.ko is the module you insmod
+	echo cmd is the command you run
 else
-	./function.sh $@
+	./function_cmd.sh $@
 	[ $? -eq 2  ] && echo $1 can not be traced && return 2
 	echo cat trace to out.trace
 	cat /sys/kernel/debug/tracing/trace > out.trace
-	echo rmmod $2
-	rmmod $2
+	echo done
 	echo alias ot=\'vim -S ./.fungraph-vim out.trace\'
 fi
 
