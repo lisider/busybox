@@ -6,4 +6,4 @@
 # Version : 1.0
 #########################################################################
 #!/bin/bash
-export ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-;make defconfig
+export ARCH=arm CROSS_COMPILE=arm-linux-;make ok6410a_defconfig
